@@ -1,9 +1,45 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'GraphikRegular';
+  src: url('/fonts/GraphikRegular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GraphikMedium';
+  src: url('/fonts/GraphikMedium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PerfectlyNinetiesRegular';
+  src: url('/fonts/PerfectlyNineties-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  --font-sans: Switzer, system-ui, sans-serif;
+  --font-sans: GraphikRegular, system-ui, sans-serif;
+  --font-graphik-regular: GraphikRegular, system-ui, sans-serif;
+  --font-graphik-medium: GraphikMedium, system-ui, sans-serif;
+  --font-perfectly-nineties: PerfectlyNinetiesRegular, system-ui, sans-serif;
+
+  --color-white: #f5f5f5;
+  --color-black: #151515;
+  --color-gray-950: #151515;
+  --color-gray-900: #151515;
 
   --radius-4xl: 2rem;
+}
+
+h2:not(.font-mono) {
+  letter-spacing: -3px;
 }
 
 @keyframes move-x {

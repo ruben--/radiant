@@ -1,8 +1,10 @@
 'use client'
 
 import * as Headless from '@headlessui/react'
-import { ArrowLongRightIcon } from '@heroicons/react/20/solid'
+import { ArrowLongRightIcon, PencilIcon } from '@heroicons/react/20/solid'
 import { clsx } from 'clsx'
+import { useSession } from 'next-auth/react'
+import EdiText from 'react-editext'
 import {
   MotionValue,
   motion,
@@ -11,7 +13,7 @@ import {
   useSpring,
   type HTMLMotionProps,
 } from 'framer-motion'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState, useEffect } from 'react'
 import useMeasure, { type RectReadOnly } from 'react-use-measure'
 import { Container } from './container'
 import { Link } from './link'
@@ -152,13 +154,39 @@ function TestimonialCard({
   )
 }
 
-function CallToAction() {
+function CallToAction({ ctaText, isAuthenticated, onSave }: { 
+  ctaText: string
+  isAuthenticated: boolean
+  onSave: (value: string) => void
+}) {
   return (
     <div>
-      <p className="max-w-sm text-sm/6 text-gray-600">
-        Join the best sellers in the business and start using Radiant to hit
-        your targets today.
-      </p>
+      {isAuthenticated ? (
+        <div className="relative group max-w-sm">
+          <EdiText
+            type="textarea"
+            value={ctaText}
+            onSave={onSave}
+            submitOnEnter={true}
+            cancelOnEscape={true}
+            renderValue={() => (
+              <div className="relative">
+                <p className="text-sm/6 text-gray-600">
+                  {ctaText}
+                </p>
+                <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            )}
+            inputProps={{
+              className: "max-w-sm text-sm/6 text-gray-600 bg-transparent border-none outline-none w-full resize-none"
+            }}
+          />
+        </div>
+      ) : (
+        <p className="max-w-sm text-sm/6 text-gray-600">
+          {ctaText}
+        </p>
+      )}
       <div className="mt-2">
         <Link
           href="#"
@@ -173,10 +201,78 @@ function CallToAction() {
 }
 
 export function Testimonials() {
+  const { data: session, status } = useSession()
   let scrollRef = useRef<HTMLDivElement | null>(null)
   let { scrollX } = useScroll({ container: scrollRef })
   let [setReferenceWindowRef, bounds] = useMeasure()
   let [activeIndex, setActiveIndex] = useState(0)
+  const [subheading, setSubheading] = useState('What everyone is saying')
+  const [heading, setHeading] = useState('Trusted by professionals.')
+  const [ctaText, setCtaText] = useState('Join the best sellers in the business and start using Radiant to hit your targets today.')
+  const [loading, setLoading] = useState(false)
+  
+  const isAuthenticated = status === 'authenticated'
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      const keys = ['testimonials-subheading', 'testimonials-heading', 'testimonials-cta']
+      for (const key of keys) {
+        try {
+          const response = await fetch(`/api/content?key=${key}`)
+          const data = await response.json()
+          if (data.value) {
+            switch (key) {
+              case 'testimonials-subheading':
+                setSubheading(data.value)
+                break
+              case 'testimonials-heading':
+                setHeading(data.value)
+                break
+              case 'testimonials-cta':
+                setCtaText(data.value)
+                break
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to fetch ${key}:`, error)
+        }
+      }
+    }
+    
+    fetchContent()
+  }, [])
+
+  const handleSave = async (key: string, value: string, setter: (value: string) => void) => {
+    if (!isAuthenticated) return
+    
+    setLoading(true)
+    try {
+      const response = await fetch('/api/content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ key, value })
+      })
+
+      if (response.ok) {
+        setter(value)
+        console.log(`${key} saved successfully!`)
+      } else {
+        const errorData = await response.json()
+        console.error(`Failed to save ${key}:`, errorData.error)
+        alert(`Failed to save: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error(`Error saving ${key}:`, error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubheadingSave = (value: string) => handleSave('testimonials-subheading', value, setSubheading)
+  const handleHeadingSave = (value: string) => handleSave('testimonials-heading', value, setHeading)
+  const handleCtaSave = (value: string) => handleSave('testimonials-cta', value, setCtaText)
 
   useMotionValueEvent(scrollX, 'change', (x) => {
     setActiveIndex(Math.floor(x / scrollRef.current!.children[0].clientWidth))
@@ -189,13 +285,53 @@ export function Testimonials() {
   }
 
   return (
-    <div className="overflow-hidden py-32">
+    <div className="testimonials overflow-hidden py-32">
       <Container>
         <div ref={setReferenceWindowRef}>
-          <Subheading>What everyone is saying</Subheading>
-          <Heading as="h3" className="mt-2">
-            Trusted by professionals.
-          </Heading>
+          {isAuthenticated ? (
+            <div className="relative group inline-block">
+              <EdiText
+                type="text"
+                value={subheading}
+                onSave={handleSubheadingSave}
+                submitOnEnter={true}
+                cancelOnEscape={true}
+                renderValue={() => (
+                  <div className="relative inline-flex">
+                    <Subheading>{subheading}</Subheading>
+                    <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                )}
+                inputProps={{
+                  className: "bg-transparent border-none outline-none text-sm font-semibold uppercase tracking-widest text-gray-500"
+                }}
+              />
+            </div>
+          ) : (
+            <Subheading>{subheading}</Subheading>
+          )}
+          {isAuthenticated ? (
+            <div className="relative group inline-block mt-2">
+              <EdiText
+                type="text"
+                value={heading}
+                onSave={handleHeadingSave}
+                submitOnEnter={true}
+                cancelOnEscape={true}
+                renderValue={() => (
+                  <div className="relative inline-flex">
+                    <Heading as="h3" className="mt-2">{heading}</Heading>
+                    <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                )}
+                inputProps={{
+                  className: "bg-transparent border-none outline-none text-2xl font-medium text-gray-950 font-[--font-graphik-medium]"
+                }}
+              />
+            </div>
+          ) : (
+            <Heading as="h3" className="mt-2">{heading}</Heading>
+          )}
         </div>
       </Container>
       <div
@@ -224,7 +360,11 @@ export function Testimonials() {
       </div>
       <Container className="mt-16">
         <div className="flex justify-between">
-          <CallToAction />
+          <CallToAction 
+            ctaText={ctaText}
+            isAuthenticated={isAuthenticated}
+            onSave={handleCtaSave}
+          />
           <div className="hidden sm:flex sm:gap-2">
             {testimonials.map(({ name }, testimonialIndex) => (
               <Headless.Button

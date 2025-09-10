@@ -6,9 +6,6 @@ import EdiText from 'react-editext'
 import { Button } from './button'
 import { Container } from './container'
 import { Gradient } from './gradient'
-import { Link } from './link'
-import { Navbar } from './navbar'
-import { ChevronRightIcon } from '@heroicons/react/16/solid'
 import { PencilIcon } from '@heroicons/react/24/outline'
 
 interface HeroWithEditProps {
@@ -100,40 +97,30 @@ export function HeroWithEdit({
   const handleButton2Save = (value: string) => handleSave('button-2', value, setButton2Text)
 
   return (
-    <div className="relative">
+    <div className="hero-with-edit relative">
       <Gradient className="absolute inset-2 bottom-0 rounded-4xl ring-1 ring-black/5 ring-inset" />
       <Container className="relative">
-        <Navbar
-          banner={
-            <Link
-              href="/blog/radiant-raises-100m-series-a-from-tailwind-ventures"
-              className="flex items-center gap-1 rounded-full bg-fuchsia-950/35 px-3 py-0.5 text-sm/6 font-medium text-white data-hover:bg-fuchsia-950/30"
-            >
-              Radiant raises $100M Series A from Tailwind Ventures
-              <ChevronRightIcon className="size-4" />
-            </Link>
-          }
-        />
-        <div className="pt-16 pb-24 sm:pt-24 sm:pb-32 md:pt-32 md:pb-48">
+        <div className="pt-8 pb-24 sm:pt-12 sm:pb-32 md:pt-16 md:pb-48">
           {isAuthenticated ? (
-            <div className="relative group">
+            <div className="relative group cursor-pointer">
               <EdiText
                 type="text"
                 value={heroTitle}
                 onSave={handleTitleSave}
                 submitOnEnter={true}
                 cancelOnEscape={true}
-                renderValue={() => (
-                  <div className="relative">
-                    <h1 className="font-display text-6xl/[0.9] font-medium tracking-tight text-balance text-gray-950 sm:text-8xl/[0.8] md:text-9xl/[0.8]">
-                      {heroTitle}
-                    </h1>
-                    <PencilIcon className="absolute -top-2 -right-10 h-6 w-6 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                )}
+                viewContainerClassName="font-display text-6xl/[0.9] font-medium tracking-tight text-balance text-gray-950 sm:text-8xl/[0.8] md:text-9xl/[0.8] cursor-pointer hover:bg-gray-50 rounded px-2 py-1 min-h-[1em] relative"
+                editContainerClassName="font-display text-6xl/[0.9] font-medium tracking-tight text-balance text-gray-950 sm:text-8xl/[0.8] md:text-9xl/[0.8]"
                 inputProps={{
-                  className: "font-display text-6xl/[0.9] font-medium tracking-tight text-balance text-gray-950 sm:text-8xl/[0.8] md:text-9xl/[0.8] bg-transparent border-none outline-none"
+                  className: "font-display text-6xl/[0.9] font-medium tracking-tight text-balance text-gray-950 sm:text-8xl/[0.8] md:text-9xl/[0.8] bg-transparent border-2 border-blue-500 outline-none w-full rounded px-2 py-1",
+                  style: { resize: 'none' }
                 }}
+                renderValue={(value) => (
+                  <span className="block">
+                    {value}
+                    <PencilIcon className="absolute -top-2 -right-10 h-6 w-6 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  </span>
+                )}
               />
             </div>
           ) : (
@@ -142,24 +129,25 @@ export function HeroWithEdit({
             </h1>
           )}
           {isAuthenticated ? (
-            <div className="relative group mt-8">
+            <div className="relative group mt-8 cursor-pointer">
               <EdiText
                 type="text"
                 value={heroSubtitle}
                 onSave={handleSubtitleSave}
                 submitOnEnter={true}
                 cancelOnEscape={true}
-                renderValue={() => (
-                  <div className="relative">
-                    <p className="max-w-lg text-xl/7 font-medium text-gray-950/75 sm:text-2xl/8">
-                      {heroSubtitle}
-                    </p>
-                    <PencilIcon className="absolute -top-1 -right-8 h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                )}
+                viewContainerClassName="max-w-lg text-xl/7 font-medium text-gray-950/75 sm:text-2xl/8 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 min-h-[1em] relative"
+                editContainerClassName="max-w-lg text-xl/7 font-medium text-gray-950/75 sm:text-2xl/8"
                 inputProps={{
-                  className: "max-w-lg text-xl/7 font-medium text-gray-950/75 sm:text-2xl/8 bg-transparent border-none outline-none w-full"
+                  className: "max-w-lg text-xl/7 font-medium text-gray-950/75 sm:text-2xl/8 bg-transparent border-2 border-blue-500 outline-none w-full rounded px-2 py-1",
+                  style: { resize: 'none' }
                 }}
+                renderValue={(value) => (
+                  <span className="block">
+                    {value}
+                    <PencilIcon className="absolute -top-1 -right-8 h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  </span>
+                )}
               />
             </div>
           ) : (
@@ -169,22 +157,24 @@ export function HeroWithEdit({
           )}
           <div className="mt-12 flex flex-col gap-x-6 gap-y-4 sm:flex-row">
             {isAuthenticated ? (
-              <div className="relative group inline-block">
+              <div className="relative group inline-block cursor-pointer">
                 <EdiText
                   type="text"
                   value={button1Text}
                   onSave={handleButton1Save}
                   submitOnEnter={true}
                   cancelOnEscape={true}
-                  renderValue={() => (
-                    <div className="relative inline-flex">
-                      <Button href="#">{button1Text}</Button>
-                      <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  )}
+                  viewContainerClassName="relative inline-flex cursor-pointer hover:opacity-80 rounded min-h-[1em]"
+                  editContainerClassName="relative inline-flex"
                   inputProps={{
-                    className: "bg-transparent border-none outline-none text-white font-medium"
+                    className: "bg-blue-600 text-white font-medium px-4 py-2 rounded-full border-2 border-blue-500 outline-none"
                   }}
+                  renderValue={(value) => (
+                    <span className="inline-flex relative">
+                      <Button href="#">{value}</Button>
+                      <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    </span>
+                  )}
                 />
               </div>
             ) : (
@@ -192,22 +182,24 @@ export function HeroWithEdit({
             )}
             
             {isAuthenticated ? (
-              <div className="relative group inline-block">
+              <div className="relative group inline-block cursor-pointer">
                 <EdiText
                   type="text"
                   value={button2Text}
                   onSave={handleButton2Save}
                   submitOnEnter={true}
                   cancelOnEscape={true}
-                  renderValue={() => (
-                    <div className="relative inline-flex">
-                      <Button variant="secondary" href="/pricing">{button2Text}</Button>
-                      <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  )}
+                  viewContainerClassName="relative inline-flex cursor-pointer hover:opacity-80 rounded min-h-[1em]"
+                  editContainerClassName="relative inline-flex"
                   inputProps={{
-                    className: "bg-transparent border-none outline-none text-gray-950 font-medium"
+                    className: "bg-white border border-gray-300 text-gray-950 font-medium px-4 py-2 rounded-full border-2 border-gray-300 outline-none"
                   }}
+                  renderValue={(value) => (
+                    <span className="inline-flex relative">
+                      <Button variant="secondary" href="/pricing">{value}</Button>
+                      <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    </span>
+                  )}
                 />
               </div>
             ) : (
