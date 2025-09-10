@@ -1,3 +1,9 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { PencilIcon } from '@heroicons/react/24/outline'
+import EdiText from 'react-editext'
 import { PlusGrid, PlusGridItem, PlusGridRow } from '@/components/plus-grid'
 import { Button } from './button'
 import { Container } from './container'
@@ -6,25 +12,142 @@ import { Link } from './link'
 import { Logo } from './logo'
 import { Subheading } from './text'
 
-function CallToAction() {
+function CallToAction({ 
+  subheading, 
+  heading, 
+  description, 
+  buttonText, 
+  isAuthenticated, 
+  onSubheadingSave, 
+  onHeadingSave, 
+  onDescriptionSave, 
+  onButtonSave 
+}: {
+  subheading: string
+  heading: string
+  description: string
+  buttonText: string
+  isAuthenticated: boolean
+  onSubheadingSave: (value: string) => void
+  onHeadingSave: (value: string) => void
+  onDescriptionSave: (value: string) => void
+  onButtonSave: (value: string) => void
+}) {
   return (
     <div className="relative pt-20 pb-16 text-center sm:py-24">
       <hgroup>
-        <Subheading>Get started</Subheading>
-        <p className="mt-6 text-3xl font-medium tracking-tight text-gray-950 sm:text-5xl">
-          Ready to dive in?
-          <br />
-          Start your free trial today.
-        </p>
+        {isAuthenticated ? (
+          <div className="relative group inline-block">
+            <EdiText
+              type="text"
+              value={subheading}
+              onSave={onSubheadingSave}
+              submitOnEnter={true}
+              cancelOnEscape={true}
+              renderValue={() => (
+                <div className="relative inline-flex">
+                  <Subheading>{subheading}</Subheading>
+                  <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+              inputProps={{
+                className: "bg-transparent border-none outline-none text-sm font-semibold uppercase tracking-widest text-gray-500"
+              }}
+            />
+          </div>
+        ) : (
+          <Subheading>{subheading}</Subheading>
+        )}
+        {isAuthenticated ? (
+          <div className="relative group mt-6">
+            <EdiText
+              type="textarea"
+              value={heading}
+              onSave={onHeadingSave}
+              submitOnEnter={true}
+              cancelOnEscape={true}
+              renderValue={() => (
+                <div className="relative">
+                  <p className="text-3xl font-medium tracking-tight text-gray-950 sm:text-5xl font-[--font-graphik-medium]">
+                    {heading.split('\n').map((line, index) => (
+                      <span key={index}>
+                        {line}
+                        {index < heading.split('\n').length - 1 && <br />}
+                      </span>
+                    ))}
+                  </p>
+                  <PencilIcon className="absolute -top-2 -right-8 h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+              inputProps={{
+                className: "text-3xl font-medium tracking-tight text-gray-950 sm:text-5xl font-[--font-graphik-medium] bg-transparent border-none outline-none w-full text-center resize-none"
+              }}
+            />
+          </div>
+        ) : (
+          <p className="mt-6 text-3xl font-medium tracking-tight text-gray-950 sm:text-5xl font-[--font-graphik-medium]">
+            {heading.split('\n').map((line, index) => (
+              <span key={index}>
+                {line}
+                {index < heading.split('\n').length - 1 && <br />}
+              </span>
+            ))}
+          </p>
+        )}
       </hgroup>
-      <p className="mx-auto mt-6 max-w-xs text-sm/6 text-gray-500">
-        Get the cheat codes for selling and unlock your team&apos;s revenue
-        potential.
-      </p>
+      {isAuthenticated ? (
+        <div className="relative group mx-auto mt-6 max-w-xs">
+          <EdiText
+            type="textarea"
+            value={description}
+            onSave={onDescriptionSave}
+            submitOnEnter={true}
+            cancelOnEscape={true}
+            renderValue={() => (
+              <div className="relative">
+                <p className="text-sm/6 text-gray-500">
+                  {description}
+                </p>
+                <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            )}
+            inputProps={{
+              className: "text-sm/6 text-gray-500 bg-transparent border-none outline-none w-full text-center resize-none"
+            }}
+          />
+        </div>
+      ) : (
+        <p className="mx-auto mt-6 max-w-xs text-sm/6 text-gray-500">
+          {description}
+        </p>
+      )}
       <div className="mt-6">
-        <Button className="w-full sm:w-auto" href="#">
-          Get started
-        </Button>
+        {isAuthenticated ? (
+          <div className="relative group inline-block">
+            <EdiText
+              type="text"
+              value={buttonText}
+              onSave={onButtonSave}
+              submitOnEnter={true}
+              cancelOnEscape={true}
+              renderValue={() => (
+                <div className="relative inline-flex">
+                  <Button className="w-full sm:w-auto" href="#">
+                    {buttonText}
+                  </Button>
+                  <PencilIcon className="absolute -top-1 -right-6 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+              inputProps={{
+                className: "bg-transparent border-none outline-none text-white font-medium"
+              }}
+            />
+          </div>
+        ) : (
+          <Button className="w-full sm:w-auto" href="#">
+            {buttonText}
+          </Button>
+        )}
       </div>
     </div>
   )
@@ -154,12 +277,96 @@ function Copyright() {
 }
 
 export function Footer() {
+  const { data: session, status } = useSession()
+  const [subheading, setSubheading] = useState('Get started')
+  const [heading, setHeading] = useState('Ready to dive in?\nStart your free trial today.')
+  const [description, setDescription] = useState('Get the cheat codes for selling and unlock your team\'s revenue potential.')
+  const [buttonText, setButtonText] = useState('Get started')
+  const [loading, setLoading] = useState(false)
+  
+  const isAuthenticated = status === 'authenticated'
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      const keys = ['footer-subheading', 'footer-heading', 'footer-description', 'footer-button']
+      for (const key of keys) {
+        try {
+          const response = await fetch(`/api/content?key=${key}`)
+          const data = await response.json()
+          if (data.value) {
+            switch (key) {
+              case 'footer-subheading':
+                setSubheading(data.value)
+                break
+              case 'footer-heading':
+                setHeading(data.value)
+                break
+              case 'footer-description':
+                setDescription(data.value)
+                break
+              case 'footer-button':
+                setButtonText(data.value)
+                break
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to fetch ${key}:`, error)
+        }
+      }
+    }
+    
+    fetchContent()
+  }, [])
+
+  const handleSave = async (key: string, value: string, setter: (value: string) => void) => {
+    if (!isAuthenticated) return
+    
+    setLoading(true)
+    try {
+      const response = await fetch('/api/content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ key, value })
+      })
+
+      if (response.ok) {
+        setter(value)
+        console.log(`${key} saved successfully!`)
+      } else {
+        const errorData = await response.json()
+        console.error(`Failed to save ${key}:`, errorData.error)
+        alert(`Failed to save: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error(`Error saving ${key}:`, error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubheadingSave = (value: string) => handleSave('footer-subheading', value, setSubheading)
+  const handleHeadingSave = (value: string) => handleSave('footer-heading', value, setHeading)
+  const handleDescriptionSave = (value: string) => handleSave('footer-description', value, setDescription)
+  const handleButtonSave = (value: string) => handleSave('footer-button', value, setButtonText)
+
   return (
-    <footer>
+    <footer className="footer">
       <Gradient className="relative">
         <div className="absolute inset-2 rounded-4xl bg-white/80" />
         <Container>
-          <CallToAction />
+          <CallToAction 
+            subheading={subheading}
+            heading={heading}
+            description={description}
+            buttonText={buttonText}
+            isAuthenticated={isAuthenticated}
+            onSubheadingSave={handleSubheadingSave}
+            onHeadingSave={handleHeadingSave}
+            onDescriptionSave={handleDescriptionSave}
+            onButtonSave={handleButtonSave}
+          />
           <PlusGrid className="pb-16">
             <PlusGridRow>
               <div className="grid grid-cols-2 gap-y-10 pb-6 lg:grid-cols-6 lg:gap-8">
