@@ -1,3 +1,4 @@
+import { AuthProvider } from '@/components/auth-provider'
 import { SanityLive } from '@/sanity/live'
 import { revalidateSyncTags } from '@/sanity/revalidateSyncTags'
 import '@/styles/tailwind.css'
@@ -30,8 +31,10 @@ export default function RootLayout({
         />
       </head>
       <body className="text-gray-950 antialiased">
-        {children}
-        <SanityLive revalidateSyncTags={revalidateSyncTags} />
+        <AuthProvider>
+          {children}
+          <SanityLive revalidateSyncTags={revalidateSyncTags} />
+        </AuthProvider>
       </body>
     </html>
   )

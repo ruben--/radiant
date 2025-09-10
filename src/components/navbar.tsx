@@ -7,28 +7,50 @@ import {
 } from '@headlessui/react'
 import { Bars2Icon } from '@heroicons/react/24/solid'
 import { motion } from 'framer-motion'
+import { useSession, signOut } from 'next-auth/react'
 import { Link } from './link'
 import { Logo } from './logo'
 import { PlusGrid, PlusGridItem, PlusGridRow } from './plus-grid'
 
-const links = [
+const staticLinks = [
   { href: '/pricing', label: 'Pricing' },
   { href: '/company', label: 'Company' },
   { href: '/blog', label: 'Blog' },
-  { href: '/login', label: 'Login' },
 ]
 
 function DesktopNav() {
+  const { data: session, status } = useSession()
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' })
+  }
+
+  const links = [
+    ...staticLinks,
+    ...(status === 'authenticated'
+      ? [{ href: '#', label: `Hi, ${session?.user?.name || session?.user?.email}`, isUser: true }]
+      : [{ href: '/login', label: 'Login' }])
+  ]
+
   return (
     <nav className="relative hidden lg:flex">
-      {links.map(({ href, label }) => (
+      {links.map(({ href, label, isUser }) => (
         <PlusGridItem key={href} className="relative flex">
-          <Link
-            href={href}
-            className="flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/2.5"
-          >
-            {label}
-          </Link>
+          {isUser ? (
+            <button
+              onClick={handleSignOut}
+              className="flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply hover:bg-black/2.5"
+            >
+              {label} (Logout)
+            </button>
+          ) : (
+            <Link
+              href={href}
+              className="flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/2.5"
+            >
+              {label}
+            </Link>
+          )}
         </PlusGridItem>
       ))}
     </nav>
@@ -47,10 +69,23 @@ function MobileNavButton() {
 }
 
 function MobileNav() {
+  const { data: session, status } = useSession()
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' })
+  }
+
+  const links = [
+    ...staticLinks,
+    ...(status === 'authenticated'
+      ? [{ href: '#', label: `Hi, ${session?.user?.name || session?.user?.email}`, isUser: true }]
+      : [{ href: '/login', label: 'Login' }])
+  ]
+
   return (
     <DisclosurePanel className="lg:hidden">
       <div className="flex flex-col gap-6 py-4">
-        {links.map(({ href, label }, linkIndex) => (
+        {links.map(({ href, label, isUser }, linkIndex) => (
           <motion.div
             initial={{ opacity: 0, rotateX: -90 }}
             animate={{ opacity: 1, rotateX: 0 }}
@@ -61,9 +96,18 @@ function MobileNav() {
             }}
             key={href}
           >
-            <Link href={href} className="text-base font-medium text-gray-950">
-              {label}
-            </Link>
+            {isUser ? (
+              <button
+                onClick={handleSignOut}
+                className="text-base font-medium text-gray-950"
+              >
+                {label} (Logout)
+              </button>
+            ) : (
+              <Link href={href} className="text-base font-medium text-gray-950">
+                {label}
+              </Link>
+            )}
           </motion.div>
         ))}
       </div>
